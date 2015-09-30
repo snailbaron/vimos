@@ -1,18 +1,3 @@
-function! ByteCountToString(byteCount)
-    if a:byteCount >= 1024 * 1024 * 1024
-        let num = a:byteCount / (1024 * 1024 * 1024) . 'G'
-    elseif a:byteCount >= 1024 * 1024
-        let num = a:byteCount / (1024 * 1024) . 'M'
-    elseif a:byteCount >= 1024
-        let num = a:byteCount / 1024 . 'K'
-    else
-        let num = a:byteCount . 'B'
-    endif
-
-    return num
-endfunction
-
-
 function! ShowDir()
     let files = glob("*", 0, 1)
 
@@ -40,17 +25,38 @@ function! ShowDir()
     call cursor(3, line('.'))
 endfunction
 
-function! SelectDir()
+" Get information on file under cursor
+function! GetFileInfo()
     let line = getline(line('.'))
     let matches = matchlist(line, '\s*\(\S\+\)\s\+\(\S\+\)\s\+\(\S\+\)\s\+\(.*\S\+\)\s*$')
 
-    let type = get(matches, 1)
-    let fileName = get(matches, 4)
+    let fileInfo = {
+    \   'type': get(matches, 1),
+    \   'name': get(matches, 4)
+    \}
 
-    if type == 'dir'
-        exe "chdir " . fileName
+    return fileInfo
+endfunction
+
+function! SelectDir()
+    let info = GetFileInfo()
+
+    if info['type'] == 'dir'
+        exe "chdir " . info['name']
         call ShowDir()
     endif
 endfunction
 
+function! Exit()
+    execute 'source ' . g:workspace_path
+endfunction
+
+function! Main()
+    call ShowDir()
+endfunction
+
 nmap <CR> :call SelectDir()<CR>
+nmap <Esc> :call Exit()<CR>
+nmap <F5> :call ShowDir()<CR>
+
+call Main()
