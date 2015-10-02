@@ -70,7 +70,7 @@ endfunction
 
 
 
-nmap <CR> :call Calc_OnEnter()<CR>
+"nmap <CR> :call Calc_OnEnter()<CR>
 nmap <Esc> :q!<CR>
 
 let vis_calc = [
@@ -99,7 +99,7 @@ let vis_calc = [
 \   '+---------------------------+'
 \]
 
-let vis_help = [
+let b:vis_help = [
 \   '-------------------+----+',
 \   '                   | -> |',
 \   '  Help             +----+',
@@ -117,77 +117,65 @@ for i in range(100)
     call append(line('$'), '')
 endfor
 
-let x_start = 0
-let y_start = 30
 
-let max_len = 0
-for l in vis_help
-    if strlen(l) > max_len
-        let max_len = strlen(l)
-    endif
-endfor
 
-for i in reverse(range(max_len))
-    let y = y_start - 1
-    for l in vis_help
-        let y += 1
-
-        let offset = strlen(l) - i
-        if offset > 0
-            let ss = matchstr(l, '.\{' . offset . '\}$')
-        else
-            let ss = ''
+function! Move(widget, y, x, dir)
+    " Get maximum line length
+    let max_len = 0
+    for l in a:widget
+        if strlen(l) > max_len
+            let max_len = strlen(l)
         endif
-        call setline(y, ss)
     endfor
-    redraw
-    sleep 20ms
-endfor
+
+    " Move widget
+    let r = range(max_len)
+    if a:dir == 'left'
+        let r = reverse(r)
+    endif
+    for i in r
+        " Draw one position of widget
+        for j in range(len(a:widget))
+            " Draw line j of widget
+            let widget_line = a:widget[j]
+            if strlen(widget_line) < max_len
+                for k in range(max_len - strlen(widget_line))
+                    let widget_line .= ' '
+                endfor
+            endif
+
+            let ss = matchstr(widget_line, '.\{' . i . '\}$')
+
+            let orig_line = getline(a:y + j)
+            if len(orig_line) < a:x
+                let suffix = ''
+                for k in range(a:x - len(orig_line))
+                    let suffix = suffix . ' '
+                endfor
+                call setline(a:y + j, orig_line . suffix)
+            endif
+
+            let prefix = matchstr(getline(a:y + j), '^.\{' . (a:x - 1) . '\}')
+            call setline(a:y + j, prefix . ss)
+        endfor
+        redraw
+        sleep 20m
+    endfor
+endfunction
 
 
+let b:dir = 'right'
 
-"call append(line('$'), '+--+-----+--+')
-"for i in range(20)
-"    sleep 20m
-"    call setline(line('$'), '   |     |')
-"    call append(line('$'), '   +-----+')
-"    redraw
-"endfor
+function! Test()
+    call Move(b:vis_help, 8, 30, b:dir)
+    if b:dir == 'right'
+        let b:dir = 'left'
+    elseif b:dir == 'left'
+        let b:dir = 'right'
+    endif
+endfunction
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+nmap <CR> :call Test()<CR>
 
 " Calculator outline
 " ==================
