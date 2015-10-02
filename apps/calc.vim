@@ -70,19 +70,121 @@ endfunction
 
 
 
-
-call append(line('$'), '| ')
-call append(line('$'), '+-----------------------------')
-call append(line('$'), '|')
-call append(line('$'), '+-----------------------------')
-call append(line('$'), '')
-call append(line('$'), '1 2 3 +')
-call append(line('$'), '4 5 6 -')
-call append(line('$'), '7 8 9 *')
-call append(line('$'), '= 0 . /')
-call append(line('$'), '')
-
 nmap <CR> :call Calc_OnEnter()<CR>
+nmap <Esc> :q!<CR>
+
+let vis_calc = [
+\   '+---------------------------+',
+\   '|                        <@ |',
+\   '+---------------------------+',
+\   '|                        <- |',
+\   '+---------------------------+',
+\   '|                           |',
+\   '|  +---+ +---+ +---+ +---+  +----+',
+\   '|  | 1 | | 2 | | 3 | | + |  | -> |',
+\   '|  +---+ +---+ +---+ +---+  +----+',
+\   '|                           |',
+\   '|  +---+ +---+ +---+ +---+  |',
+\   '|  | 4 | | 5 | | 6 | | - |  |',
+\   '|  +---+ +---+ +---+ +---+  |',
+\   '|                           |',
+\   '|  +---+ +---+ +---+ +---+  |',
+\   '|  | 7 | | 8 | | 9 | | * |  |',
+\   '|  +---+ +---+ +---+ +---+  |',
+\   '|                           |',
+\   '|  +---+ +---+ +---+ +---+  |',
+\   '|  | 0 | | . | | = | | / |  |',
+\   '|  +---+ +---+ +---+ +---+  |',
+\   '|                           |',
+\   '+---------------------------+'
+\]
+
+let vis_help = [
+\   '-------------------+----+',
+\   '                   | -> |',
+\   '  Help             +----+',
+\   '  ----             |',
+\   '  This is help     |',
+\   '                   |',
+\   '-------------------+'
+\]
+
+for l in vis_calc
+    call append(line('$'), l)
+endfor
+
+for i in range(100)
+    call append(line('$'), '')
+endfor
+
+let x_start = 0
+let y_start = 30
+
+let max_len = 0
+for l in vis_help
+    if strlen(l) > max_len
+        let max_len = strlen(l)
+    endif
+endfor
+
+for i in reverse(range(max_len))
+    let y = y_start - 1
+    for l in vis_help
+        let y += 1
+
+        let offset = strlen(l) - i
+        if offset > 0
+            let ss = matchstr(l, '.\{' . offset . '\}$')
+        else
+            let ss = ''
+        endif
+        call setline(y, ss)
+    endfor
+    redraw
+    sleep 20ms
+endfor
+
+
+
+"call append(line('$'), '+--+-----+--+')
+"for i in range(20)
+"    sleep 20m
+"    call setline(line('$'), '   |     |')
+"    call append(line('$'), '   +-----+')
+"    redraw
+"endfor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -96,9 +198,9 @@ nmap <CR> :call Calc_OnEnter()<CR>
 " |                     12 <- |
 " +---------------------------+
 " |                           |
-" |  +---+ +---+ +---+ +---+  |
-" |  | 1 | | 2 | | 3 | | + |  |
-" |  +---+ +---+ +---+ +---+  |
+" |  +---+ +---+ +---+ +---+  +------+
+" |  | 1 | | 2 | | 3 | | + |  | Help |
+" |  +---+ +---+ +---+ +---+  +------+
 " |                           |
 " |  +---+ +---+ +---+ +---+  |
 " |  | 4 | | 5 | | 6 | | - |  |
