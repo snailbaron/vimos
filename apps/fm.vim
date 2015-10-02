@@ -48,7 +48,7 @@ function! SelectDir()
 endfunction
 
 function! Exit()
-    execute 'source ' . g:workspace_path
+    execute 'source ' . g:workspace_file
 endfunction
 
 function! Main()

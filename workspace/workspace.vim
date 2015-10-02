@@ -1,6 +1,16 @@
-"let g:workspace_path = 'C:/non-work/code/vim/workspace/workspace.vim'
-let g:workspace_path = expand('%:p')
-call append(line('$'), g:workspace_path)
+
+" Workspace initialization.
+" Must be run only once.
+function! Init()
+    let g:workspace_dir = getcwd()
+    let g:workspace_file = g:workspace_dir . '/workspace.vim'
+endfunction
+
+" Workspace start function.
+" Must be run every time when workspace is executed.
+function! Start()
+    execute 'chdir ' . g:workspace_dir
+endfunction
 
 let s:shortcuts = [
 \   {
@@ -12,7 +22,6 @@ let s:shortcuts = [
 \       'name': 'Console'
 \   }
 \]
-
 
 function! Main()
     exe "%d"
@@ -26,19 +35,29 @@ function! Main()
         call append(line('$'), '| ' . s['name'])
     endfor
 
+    "call append(line('$'), 'workspace: ' . g:workspace_dir)
+    "call append(line('$'), 'cwd: ' . getcwd())
 endfunction
 
 function! OnEnter()
     let col = col('.')
     let line = line('.')
 
-    let sc_id = line('.') - 3
+    let sc_id = line('.') - 4
     if sc_id >= 0 && sc_id < len(s:shortcuts)
-        "if col('.') - 3 >= 0 && col('.') - 3 < strlen(s:shortcuts[sc_id]['name'])
         execute 'source ../apps/' . s:shortcuts[sc_id]['app'] . '.vim'
         "endif
     endif
 
 endfunction
 
+
+" Execution starts here
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+if !exists('g:guard_workspace')
+    call Init()
+    let g:guard_workspace = 1
+endif
+
+call Start()
 call Main()
