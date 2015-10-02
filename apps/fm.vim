@@ -38,7 +38,7 @@ function! GetFileInfo()
     return fileInfo
 endfunction
 
-function! SelectDir()
+function! OnEnter()
     let info = GetFileInfo()
 
     if info['type'] == 'dir'
@@ -47,16 +47,11 @@ function! SelectDir()
     endif
 endfunction
 
-function! Exit()
-    execute 'source ' . g:workspace_file
-endfunction
-
 function! Main()
     call ShowDir()
 endfunction
 
-nmap <CR> :call SelectDir()<CR>
-nmap <Esc> :call Exit()<CR>
-nmap <F5> :call ShowDir()<CR>
 
-call Main()
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+nmap <F5> :call ShowDir()<CR>
+call ShowDir()

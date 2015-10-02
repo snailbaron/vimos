@@ -18,8 +18,12 @@ let s:shortcuts = [
 \       'name': 'File Manager'
 \   },
 \   {
-\       'app': 'console',
-\       'name': 'Console'
+\       'app': 'calc',
+\       'name' : 'Calculator'
+\   },
+\   {
+\       'app': 'test',
+\       'name': 'Test program'
 \   }
 \]
 
@@ -35,8 +39,8 @@ function! Main()
         call append(line('$'), '| ' . s['name'])
     endfor
 
-    "call append(line('$'), 'workspace: ' . g:workspace_dir)
-    "call append(line('$'), 'cwd: ' . getcwd())
+    call cursor(4, 0)
+
 endfunction
 
 function! OnEnter()
@@ -45,10 +49,10 @@ function! OnEnter()
 
     let sc_id = line('.') - 4
     if sc_id >= 0 && sc_id < len(s:shortcuts)
+        new
+        execute 'file ' . s:shortcuts[sc_id]['name']
         execute 'source ../apps/' . s:shortcuts[sc_id]['app'] . '.vim'
-        "endif
     endif
-
 endfunction
 
 
