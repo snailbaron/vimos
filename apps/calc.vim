@@ -81,9 +81,9 @@ nmap <CR> :call Calc_OnEnter()<CR>
 nmap <Esc> :q!<CR>
 
 let b:vis_help = [
-\   '+--+--------------------------------------------+------+',
-\   '   |                Vimculator                  | Help |',
-\   '+--+                ----------                  +------+',
+\   '---+--------------------------------------------+----+',
+\   '   |                Vimculator                  | -> |',
+\   '---+                ----------                  +----+',
 \   '   |                                            |',
 \   "   | Oh-oh... You're about to VIMCULATE!        |",
 \   '   |                                            |',
@@ -108,7 +108,7 @@ let b:vis_help = [
 \]
 
 
-function! Move(widget, y, x, dir)
+function! Move(widget, y, x, offset, dir)
     " Get maximum line length
     let max_len = 0
     for l in a:widget
@@ -118,7 +118,7 @@ function! Move(widget, y, x, dir)
     endfor
 
     " Move widget
-    let r = range(max_len)
+    let r = range(a:offset, max_len)
     if a:dir == 'left'
         let r = reverse(r)
     endif
@@ -162,7 +162,7 @@ endfunction
 
 let b:dir = 'right'
 function! Test()
-    call Move(b:vis_help, 7, 33, b:dir)
+    call Move(b:vis_help, 7, 33, 5, b:dir)
     if b:dir == 'right'
         let b:dir = 'left'
     elseif b:dir == 'left'
@@ -170,7 +170,7 @@ function! Test()
     endif
 endfunction
 
-nnoremap q :call Test()<CR>
+nnoremap H :call Test()<CR>
 
 let b:buttons = [
 \   [ 'CE', 7, 4, 3, 12 ],
@@ -194,19 +194,25 @@ let b:buttons = [
 \   [ '+', 23, 25, 3, 5 ],
 \]
 
-for i in range(26)
+" Initialize vimculator
+for i in range(29)
     call append(line('$'), '')
 endfor
-for i in range(1, 27)
+for i in range(1, 30)
     call setline(i, '|' . Repeat(' ', 30) . '|')
 endfor
-for i in [1, 3, 5, 27]
+call setline(7, '|' . Repeat(' ', 30) . '+----+')
+call setline(8, '|' . Repeat(' ', 30) . '| -> |')
+call setline(9, '|' . Repeat(' ', 30) . '+----+')
+for i in [1, 3, 5, 30]
     call setline(i, '+' . Repeat('-', 30) . '+')
 endfor
 call cursor(2, 28)
 execute "normal! R<@"
 call cursor(4, 28)
 execute "normal! R<-"
+call setline(27, printf('|  %-27s |', "Press 'H' for Help"))
+call setline(28, printf('|  %-27s |', 'Have fun!'))
 
 for btn in b:buttons
     call cursor(btn[1], btn[2])
@@ -235,36 +241,4 @@ for btn in b:buttons
     call cursor( btn[1] + (btn[3] - 1) / 2, btn[2] + 2 )
     execute "normal! R" . btn[0]
 endfor
-
-
-" Expected calculator outline:
-"
-" +------------------------------+
-" |                          <@  |
-" +------------------------------+
-" |                          <-  |
-" +------------------------------+
-" |                              |
-" |  +----------+  +---+  +---+  +------+
-" |  |   C E    |  | C |  | < |  | Help |
-" |  +----------+  +---+  +---+  +------+
-" |                              |
-" |  +---+  +---+  +---+  +---+  |
-" |  | 7 |  | 8 |  | 9 |  | / |  |
-" |  +---+  +---+  +---+  +---+  |
-" |                              |
-" |  +---+  +---+  +---+  +---+  |
-" |  | 4 |  | 5 |  | 6 |  | * |  |
-" |  +---+  +---+  +---+  +---+  |
-" |                              |
-" |  +---+  +---+  +---+  +---+  |
-" |  | 1 |  | 2 |  | 3 |  | - |  |
-" |  +---+  +---+  +---+  +---+  |
-" |                              |
-" |  +---+  +---+  +---+  +---+  |
-" |  | 0 |  | . |  | = |  | + |  |
-" |  +---+  +---+  +---+  +---+  |
-" |                              |
-" +------------------------------+
-
 
