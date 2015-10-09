@@ -52,7 +52,7 @@ endfunction
 
 " Print number on calc display
 function! Calc_DisplayReg()
-    call setline(2, '| reg: ' . b:reg_memory)
+    call setline(2, printf('| %24s <@  |', b:reg_memory))
 endfunction
 
 function! Calc_DisplayVisible()
@@ -60,63 +60,52 @@ function! Calc_DisplayVisible()
     if l:num == ''
         let l:num = '0'
     endif
-    call setline(4, '| ' . printf('%10s', l:num))
+    call setline(4, printf('| %24s <-  |', l:num))
 endfunction
 
 function! Calc_OnEnter()
-    let char = getline('.')[col('.') - 1]
-    call Calc_KeyPress(char)
+    let line = line('.')
+    let col = col('.')
+
+    " If any of the buttons is pressed, process and return
+    for btn in b:buttons
+        if line >= btn[1] && line < btn[1] + btn[3] && col >= btn[2] && col < btn[2] + btn[4]
+            call Calc_KeyPress(btn[0])
+            return
+        endif
+    endfor
 endfunction
 
 
-
-"nmap <CR> :call Calc_OnEnter()<CR>
+nmap <CR> :call Calc_OnEnter()<CR>
 nmap <Esc> :q!<CR>
 
-let vis_calc = [
-\   '+---------------------------+',
-\   '|                        <@ |',
-\   '+---------------------------+',
-\   '|                        <- |',
-\   '+---------------------------+',
-\   '|                           |',
-\   '|  +---+ +---+ +---+ +---+  +----+',
-\   '|  | 1 | | 2 | | 3 | | + |  | -> |',
-\   '|  +---+ +---+ +---+ +---+  +----+',
-\   '|                           |',
-\   '|  +---+ +---+ +---+ +---+  |',
-\   '|  | 4 | | 5 | | 6 | | - |  |',
-\   '|  +---+ +---+ +---+ +---+  |',
-\   '|                           |',
-\   '|  +---+ +---+ +---+ +---+  |',
-\   '|  | 7 | | 8 | | 9 | | * |  |',
-\   '|  +---+ +---+ +---+ +---+  |',
-\   '|                           |',
-\   '|  +---+ +---+ +---+ +---+  |',
-\   '|  | 0 | | . | | = | | / |  |',
-\   '|  +---+ +---+ +---+ +---+  |',
-\   '|                           |',
-\   '+---------------------------+'
-\]
-
 let b:vis_help = [
-\   '-------------------+----+',
-\   '                   | -> |',
-\   '  Help             +----+',
-\   '  ----             |',
-\   '  This is help     |',
-\   '                   |',
-\   '-------------------+'
+\   '+--+--------------------------------------------+------+',
+\   '   |                Vimculator                  | Help |',
+\   '+--+                ----------                  +------+',
+\   '   |                                            |',
+\   "   | Oh-oh... You're about to VIMCULATE!        |",
+\   '   |                                            |',
+\   '   | Embrace your wildest dreams and reach your |',
+\   '   | craziest goals with Vimculator - a simple  |',
+\   '   | arithmetics tool for smart people.         |',
+\   '   |                                            |',
+\   '   | Vimculator emulates your simple, average   |',
+\   '   | calculator device. No fancy BULLSHIT like  |',
+\   '   | square root, logarithms, memorization and  |',
+\   '   | such. All you get is ONE register and FOUR |',
+\   '   | basic arithmetic operations - and being a  |',
+\   '   | smart person you are, you know how to use  |',
+\   '   | THE STUFF!                                 |',
+\   '   |                                            |',
+\   '   | Celebrate the birth of VimOS with          |',
+\   '   | performing a couple of vimculations        |',
+\   '   | RIGHT NOW!                                 |',
+\   '   |                                            |',
+\   '   | VIMCULATE and have fun!                    |',
+\   '   +--------------------------------------------+',
 \]
-
-for l in vis_calc
-    call append(line('$'), l)
-endfor
-
-for i in range(100)
-    call append(line('$'), '')
-endfor
-
 
 
 function! Move(widget, y, x, dir)
@@ -163,11 +152,17 @@ function! Move(widget, y, x, dir)
     endfor
 endfunction
 
+function! Repeat(s, times)
+    let l:t = ''
+    for i in range(a:times)
+        let l:t = l:t . a:s
+    endfor
+    return l:t
+endfunction
 
 let b:dir = 'right'
-
 function! Test()
-    call Move(b:vis_help, 8, 30, b:dir)
+    call Move(b:vis_help, 7, 33, b:dir)
     if b:dir == 'right'
         let b:dir = 'left'
     elseif b:dir == 'left'
@@ -175,31 +170,101 @@ function! Test()
     endif
 endfunction
 
-nmap <CR> :call Test()<CR>
+nnoremap q :call Test()<CR>
 
-" Calculator outline
-" ==================
+let b:buttons = [
+\   [ 'CE', 7, 4, 3, 12 ],
+\   [ 'C', 7, 18, 3, 5 ],
+\   [ '<', 7, 25, 3, 5 ],
+\   [ '7', 11, 4, 3, 5 ],
+\   [ '8', 11, 11, 3, 5 ],
+\   [ '9', 11, 18, 3, 5 ],
+\   [ '/', 11, 25, 3, 5 ],
+\   [ '4', 15, 4, 3, 5 ],
+\   [ '5', 15, 11, 3, 5 ],
+\   [ '6', 15, 18, 3, 5 ],
+\   [ '*', 15, 25, 3, 5 ],
+\   [ '1', 19, 4, 3, 5 ],
+\   [ '2', 19, 11, 3, 5 ],
+\   [ '3', 19, 18, 3, 5 ],
+\   [ '-', 19, 25, 3, 5 ],
+\   [ '0', 23, 4, 3, 5 ],
+\   [ '.', 23, 11, 3, 5 ],
+\   [ '=', 23, 18, 3, 5 ],
+\   [ '+', 23, 25, 3, 5 ],
+\]
+
+for i in range(26)
+    call append(line('$'), '')
+endfor
+for i in range(1, 27)
+    call setline(i, '|' . Repeat(' ', 30) . '|')
+endfor
+for i in [1, 3, 5, 27]
+    call setline(i, '+' . Repeat('-', 30) . '+')
+endfor
+call cursor(2, 28)
+execute "normal! R<@"
+call cursor(4, 28)
+execute "normal! R<-"
+
+for btn in b:buttons
+    call cursor(btn[1], btn[2])
+    execute "normal! R+"
+    for i in range(btn[4] - 2)
+        execute "normal! lR-"
+    endfor
+    execute "normal! lR+"
+
+    for i in range(btn[3] - 2)
+        call cursor(btn[1] + i + 1, btn[2])
+        execute "normal! R|"
+        for j in range(btn[4] - 2)
+            execute "normal! lR "
+        endfor
+        execute "normal! lR|"
+    endfor
+        
+    call cursor(btn[1] + btn[3] - 1, btn[2])
+    execute "normal! R+"
+    for i in range(btn[4] - 2)
+        execute "normal! lR-"
+    endfor
+    execute "normal! lR+"
+
+    call cursor( btn[1] + (btn[3] - 1) / 2, btn[2] + 2 )
+    execute "normal! R" . btn[0]
+endfor
+
+
+" Expected calculator outline:
 "
-" +---------------------------+
-" |                   1024 <@ |
-" +---------------------------+
-" |                     12 <- |
-" +---------------------------+
-" |                           |
-" |  +---+ +---+ +---+ +---+  +------+
-" |  | 1 | | 2 | | 3 | | + |  | Help |
-" |  +---+ +---+ +---+ +---+  +------+
-" |                           |
-" |  +---+ +---+ +---+ +---+  |
-" |  | 4 | | 5 | | 6 | | - |  |
-" |  +---+ +---+ +---+ +---+  |
-" |                           |
-" |  +---+ +---+ +---+ +---+  |
-" |  | 7 | | 8 | | 9 | | * |  |
-" |  +---+ +---+ +---+ +---+  |
-" |                           |
-" |  +---+ +---+ +---+ +---+  |
-" |  | 0 | | . | | = | | / |  |
-" |  +---+ +---+ +---+ +---+  |
-" |                           |
-" +---------------------------+
+" +------------------------------+
+" |                          <@  |
+" +------------------------------+
+" |                          <-  |
+" +------------------------------+
+" |                              |
+" |  +----------+  +---+  +---+  +------+
+" |  |   C E    |  | C |  | < |  | Help |
+" |  +----------+  +---+  +---+  +------+
+" |                              |
+" |  +---+  +---+  +---+  +---+  |
+" |  | 7 |  | 8 |  | 9 |  | / |  |
+" |  +---+  +---+  +---+  +---+  |
+" |                              |
+" |  +---+  +---+  +---+  +---+  |
+" |  | 4 |  | 5 |  | 6 |  | * |  |
+" |  +---+  +---+  +---+  +---+  |
+" |                              |
+" |  +---+  +---+  +---+  +---+  |
+" |  | 1 |  | 2 |  | 3 |  | - |  |
+" |  +---+  +---+  +---+  +---+  |
+" |                              |
+" |  +---+  +---+  +---+  +---+  |
+" |  | 0 |  | . |  | = |  | + |  |
+" |  +---+  +---+  +---+  +---+  |
+" |                              |
+" +------------------------------+
+
+
