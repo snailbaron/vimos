@@ -3,56 +3,104 @@
 
 let b:DISPLAY_WIDTH = 20
 
-let b:reg_visible = ''
-let b:reg_memory = ''
+let b:reg_visible = '0'
+let b:reg_memory = '0'
 let b:action = ''
+let b:has_dot = 0
+
+" Perform specified action on provided arguments
+function! Calc_DoAction(action, first, second)
+    echo a:action . " " . a:first . " " . a:second
+
+    let l:res = 0.0
+    if a:action == '+'
+        let l:res = str2float(a:first) + str2float(a:second)
+    elseif a:action == '-'
+        let l:res = str2float(a:first) - str2float(a:second)
+    elseif a:action == '*'
+        let l:res = str2float(a:first) * str2float(a:second)
+    elseif a:action == '/'
+        let l:res = str2float(a:first) / str2float(a:second)
+    elseif a:action == ''
+        let l:res = str2float(a:second)
+    else
+        return ''
+    endif
+
+    if l:res == float2nr(l:res)
+        return printf('%d', float2nr(l:res))
+    else
+        return printf('%g', l:res)
+    endif
+endfunction
 
 " Calculator key press
 function! Calc_KeyPress(key)
     if a:key == '1' || a:key == '2' || a:key == '3' ||
             \a:key == '4' || a:key == '5' || a:key == '6' ||
-            \a:key == '7' || a:key == '8' || a:key == '9' ||
-            \a:key == '0'
+            \a:key == '7' || a:key == '8' || a:key == '9'
+        if b:reg_visible == '0'
+            let b:reg_visible = ''
+        endif
         let b:reg_visible = b:reg_visible . a:key
+        call Calc_DisplayReg()
+        call Calc_DisplayVisible()
+    elseif a:key == '0'
+        if b:reg_visible != '0'
+            let b:reg_visible = b:reg_visible . a:key
+        endif
+        call Calc_DisplayReg()
+        call Calc_DisplayVisible()
+    elseif a:key == '<'
+        if strlen(b:reg_visible) == 1
+            let b:reg_visible = '0'
+        else
+            let b:reg_visible = b:reg_visible[0 : strlen(b:reg_visible) - 2]
+        endif
+        call Calc_DisplayReg()
+        call Calc_DisplayVisible()
+    elseif a:key == 'C'
+        let b:reg_visible = '0'
+        call Calc_DisplayReg()
+        call Calc_DisplayVisible()
+    elseif a:key == 'CE'
+        let b:reg_memory = '0'
+        let b:reg_visible = '0'
+        let b:reg_action = ''
+        call Calc_DisplayReg()
+        call Calc_DisplayVisible()
+    elseif a:key == '.'
+        if !b:has_dot
+            let b:reg_visible = b:reg_visible . a:key
+            let b:has_dot = 1
+        endif
+        call Calc_DisplayReg()
         call Calc_DisplayVisible()
     elseif a:key == '+' || a:key == '-' || a:key == '*' || a:key == '/'
-        if b:action == '+'
-            let b:reg_memory += b:reg_visible
-        elseif b:action == '-'
-            let b:reg_memory -= b:reg_visible
-        elseif b:action == '*'
-            let b:reg_memory *= b:reg_visible
-        elseif b:action == '/'
-            let b:reg_memory /= b:reg_visible
-        else
-            let b:reg_memory = b:reg_visible
-        endif
-        let b:reg_visible = ''
+        let b:reg_memory = Calc_DoAction(b:action, b:reg_memory, b:reg_visible)
+        let b:reg_visible = '0'
         let b:action = a:key
         call Calc_DisplayReg()
         call Calc_DisplayVisible()
     elseif a:key == '='
-        if b:action == '+'
-            let b:reg_visible = b:reg_memory + b:reg_visible
-        elseif b:action == '-'
-            let b:reg_visible = b:reg_memory - b:reg_visible
-        elseif b:action == '*'
-            let b:reg_visible = b:reg_memory * b:reg_visible
-        elseif b:action == '/'
-            let b:reg_visible = b:reg_memory / b:reg_visible
-        endif
+        let b:reg_visible = Calc_DoAction(b:action, b:reg_memory, b:reg_visible)
         call Calc_DisplayVisible()
 
-        let b:reg_visible = ''
+        let b:reg_visible = '0'
         let b:reg_memory = ''
         let b:action = ''
         call Calc_DisplayReg()
     endif
+
 endfunction
 
 " Print number on calc display
 function! Calc_DisplayReg()
-    call setline(2, printf('| %24s <@  |', b:reg_memory))
+    let l:buf = b:reg_memory
+    if l:buf == '0'
+        let l:buf = ''
+    endif
+    call setline(2, printf('| %24s <@%1s |', l:buf, b:action))
 endfunction
 
 function! Calc_DisplayVisible()
@@ -89,21 +137,17 @@ let b:vis_help = [
 \   '   |                                            |',
 \   '   | Embrace your wildest dreams and reach your |',
 \   '   | craziest goals with Vimculator - a simple  |',
-\   '   | arithmetics tool for smart people.         |',
+\   '   | arithmetics tool for SMART people.         |',
 \   '   |                                            |',
 \   '   | Vimculator emulates your simple, average   |',
 \   '   | calculator device. No fancy BULLSHIT like  |',
 \   '   | square root, logarithms, memorization and  |',
 \   '   | such. All you get is ONE register and FOUR |',
 \   '   | basic arithmetic operations - and being a  |',
-\   '   | smart person you are, you know how to use  |',
+\   '   | SMART person you are, you know how to use  |',
 \   '   | THE STUFF!                                 |',
 \   '   |                                            |',
-\   '   | Celebrate the birth of VimOS with          |',
-\   '   | performing a couple of vimculations        |',
-\   '   | RIGHT NOW!                                 |',
-\   '   |                                            |',
-\   '   | VIMCULATE and have fun!                    |',
+\   "   |          Vimculate RIGHT NOW!              |",
 \   '   +--------------------------------------------+',
 \]
 
@@ -241,4 +285,6 @@ for btn in b:buttons
     call cursor( btn[1] + (btn[3] - 1) / 2, btn[2] + 2 )
     execute "normal! R" . btn[0]
 endfor
+
+call Calc_DisplayVisible()
 
