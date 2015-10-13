@@ -1,29 +1,39 @@
-# README #
+# VimOS README
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This project aims to bring the fascinating **VimOS** to the world.
 
-### What is this repository for? ###
+## What is VimOS?
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+VimOS aims to utilize the power of Vim editor to bring happiness and enjoyment to the world.
 
-### How do I get set up? ###
+## How do I get started?
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+Grab the *master* branch from the repo
 
-### Contribution guidelines ###
+    git clone https://snailbaron@bitbucket.org/snailbaron/vimos.git
 
-* Writing tests
-* Code review
-* Other guidelines
+and explore.
 
-### Who do I talk to? ###
+## Layout
 
-* Repo owner or admin
-* Other community or team contact
+Current directory layout is as follows:
+
+* **workspace** - A meta-application. The entry point for the whole VimOS thing.
+* **apps** - Stand-alone Vim "applications", can be run independently.
+
+## How to run something?
+
+Just go into the directory with some stuff (e.g. *apps*), and do
+
+    gvim -S *<app file>*
+
+I suggest trying
+
+    gvim -S calc.vim
+
+for example.
+
+## Where to get more info?
+
+I suggest you go to the [VimOS Wiki](https://bitbucket.org/snailbaron/vimos/wiki).
+
