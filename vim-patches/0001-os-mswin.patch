@@ -1,0 +1,84 @@
+From 25bf4e64b5874b2d6e9e556e0ad99cd4b90ab559 Mon Sep 17 00:00:00 2001
+From: Igor Martynov <igor.martynov@intel.com>
+Date: Fri, 16 Oct 2015 19:59:33 +0300
+Subject: [PATCH] Local patch for os_mswin, allowing TINY build.
+
+---
+ src/os_mswin.c | 54 +++++++++++++++++++++++++++---------------------------
+ 1 file changed, 27 insertions(+), 27 deletions(-)
+
+diff --git a/src/os_mswin.c b/src/os_mswin.c
+index daf71a3..a1bfe9c 100644
+--- a/src/os_mswin.c
++++ b/src/os_mswin.c
+@@ -931,33 +931,6 @@ check_str_len(char_u *str)
+ }
+ # endif
+ 
+-/*
+- * Passed to do_in_runtimepath() to load a vim.ico file.
+- */
+-    static void
+-mch_icon_load_cb(char_u *fname, void *cookie)
+-{
+-    HANDLE *h = (HANDLE *)cookie;
+-
+-    *h = LoadImage(NULL,
+-		   fname,
+-		   IMAGE_ICON,
+-		   64,
+-		   64,
+-		   LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
+-}
+-
+-/*
+- * Try loading an icon file from 'runtimepath'.
+- */
+-    int
+-mch_icon_load(iconp)
+-    HANDLE *iconp;
+-{
+-    return do_in_runtimepath((char_u *)"bitmaps/vim.ico",
+-					      FALSE, mch_icon_load_cb, iconp);
+-}
+-
+     int
+ mch_libcall(
+     char_u	*libname,
+@@ -1060,6 +1033,33 @@ mch_libcall(
+ #endif
+ 
+ /*
++ * Passed to do_in_runtimepath() to load a vim.ico file.
++ */
++    static void
++mch_icon_load_cb(char_u *fname, void *cookie)
++{
++    HANDLE *h = (HANDLE *)cookie;
++
++    *h = LoadImage(NULL,
++		   fname,
++		   IMAGE_ICON,
++		   64,
++		   64,
++		   LR_LOADFROMFILE | LR_LOADMAP3DCOLORS);
++}
++
++/*
++ * Try loading an icon file from 'runtimepath'.
++ */
++    int
++mch_icon_load(iconp)
++    HANDLE *iconp;
++{
++    return do_in_runtimepath((char_u *)"bitmaps/vim.ico",
++					      FALSE, mch_icon_load_cb, iconp);
++}
++
++/*
+  * Debugging helper: expose the MCH_WRITE_DUMP stuff to other modules
+  */
+ /*ARGSUSED*/
+-- 
+1.9.5.msysgit.0
+
