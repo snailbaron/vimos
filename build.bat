@@ -62,6 +62,10 @@ set ops=%ops% NETBEANS=no
 set ops=%ops% CSCOPE=no
 
 
+:: Clean package directory
+rmdir /s /q vim-pkg
+
+:: Go to ViM source directory for building
 cd vim\src
 
 :: Build ViM
@@ -71,8 +75,23 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Copy gvim binary
-copy gvim.exe ..\..
+:: Copy gvim binary and runtime files to package directory
+mkdir ..\..\vim-pkg
+mkdir ..\..\vim-pkg\autoload
+mkdir ..\..\vim-pkg\colors
+mkdir ..\..\vim-pkg\syntax
+
+copy gvim.exe ..\..\vim-pkg
+copy ..\runtime\autoload\paste.vim ..\..\vim-pkg\autoload\
+copy ..\runtime\colors\desert.vim ..\..\vim-pkg\colors\
+copy ..\runtime\syntax\syntax.vim ..\..\vim-pkg\syntax\
+copy ..\runtime\filetype.vim ..\..\vim-pkg\
+copy ..\runtime\menu.vim ..\..\vim-pkg\
+copy ..\runtime\rgb.txt ..\..\vim-pkg\
+
+copy ..\..\vim-pkg-src\vimos.vimrc ..\..\vim-pkg
+copy ..\..\vim-pkg-src\vimos.gvimrc ..\..\vim-pkg
+copy ..\..\vim-pkg-src\run.bat ..\..\vim-pkg
 
 :: Clean after successful build
 nmake -f Make_mvc.mak %ops% clean
