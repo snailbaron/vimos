@@ -1,3 +1,6 @@
 [submodule "vim"]
 	path = vim
 	url = https://github.com/vim/vim.git
+[submodule "wiki"]
+	path = wiki
+	url = https://snailbaron@bitbucket.org/snailbaron/vimos.git/wiki
