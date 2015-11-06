@@ -2,9 +2,28 @@
 setlocal EnableExtensions
 setlocal EnableDelayedExpansion
 
-set "target=%~1"
-if "%target%" equ "" (
-    set target=build
+:: If nmake is not available, try to find and run vcvarsall.bat
+nmake /? > NUL 2>&1
+if errorlevel 1 (
+    echo.nmake is not found, trying to find and run vcvarsall.bat
+    set key=HKLM\SOFTWARE\Microsoft\VisualStudio\12.0
+    set value=ShellFolder
+    set type=REG_SZ
+    for /f "tokens=1,2*" %%a in ('reg query !key! /v !value! /reg:32') do (
+        if "%%a" equ "!value!" if "%%b" equ "!type!" (
+            set "vspath=%%c"
+        )
+    )
+
+    set "vcvars=!vspath!\VC\vcvarsall.bat"
+    call "!vcvars!" amd64
+
+    nmake /? > NUL 2>&1
+    if errorlevel 1 (
+        echo.Failed to find nmake
+        exit /b 1
+    )
+    echo.nmake is found
 )
 
 set "ops="
@@ -13,8 +32,9 @@ set "ops="
 set ops=%ops% SDK_INCLUDE_DIR="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include"
 
 :: Feature set: TINY|SMALL|NORMAL|BIG|HUGE
-::set ops=%ops% FEATURES=NORMAL
-set ops=%ops% FEATURES=TINY
+set ops=%ops% FEATURES=NORMAL
+::set ops=%ops% FEATURES=TINY
+::set ops=%ops% FEATURES=SMALL
 
 :: GUI interface
 set ops=%ops% GUI=yes
@@ -35,10 +55,6 @@ set ops=%ops% ICONV=yes
 :: Set subsystem, to target Windows XP, not Vista (6.0)
 ::set ops=%ops% SUBSYSTEM_VER=5.01
 
-:: Debug version.
-:: Also removes /GL from compiler flags, allowing to inspect object files with dumpbin.
-::set ops=%ops% DEBUG=yes
-
 :: NetBeans support
 set ops=%ops% NETBEANS=no
 
@@ -46,26 +62,18 @@ set ops=%ops% NETBEANS=no
 set ops=%ops% CSCOPE=no
 
 
-:: Individual features to enable/disable
-set "feat="
-
-:: Syntax highlighting
-set feat=%feat% -DFEAT_SYN_HL
-set feat=%feat% -DFEAT_AUTOCMD
-set feat=%feat% -DFEAT_EVAL
-
-set ops=%ops% "DEFINES=%feat%"
-
 cd vim\src
 
-if "%target%" equ "build" (
-    nmake -f Make_mvc.mak %ops%
-    goto :eof
-)
-if "%target%" equ "clean" (
-    nmake -f Make_mvc.mak %ops% clean
-    goto :eof
+:: Build ViM
+nmake -f Make_mvc.mak %ops%
+if errorlevel 1 (
+    echo.BUILD FINISHED WITH ERRORS
+    exit /b 1
 )
 
-echo.Unknown target: %target%
+:: Copy gvim binary
+copy gvim.exe ..\..
+
+:: Clean after successful build
+nmake -f Make_mvc.mak %ops% clean
 
